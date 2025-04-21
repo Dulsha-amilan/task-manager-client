@@ -1,0 +1,29 @@
+<div class="task-item" [ngClass]="getStatusClass()">
+    <h3 class="task-title">{{ task.title }}</h3>
+    
+    <div class="task-description">
+      <p>{{ task.description }}</p>
+    </div>
+    
+    <div class="task-dates">
+      <div>
+        <span class="label">Due:</span> 
+        <span>{{ task.dueDate | date:'mediumDate' }}</span>
+      </div>
+      <div *ngIf="task.createdAt">
+        <span class="label">Created:</span> 
+        <span>{{ task.createdAt | date:'mediumDate' }}</span>
+      </div>
+    </div>
+    
+    <div class="task-status">
+      <span *ngIf="task.isCompleted" class="status completed">Completed</span>
+      <span *ngIf="!task.isCompleted && task.dueDate < (today | date)" class="status overdue">Overdue</span>
+      <span *ngIf="!task.isCompleted && task.dueDate >= (today | date)" class="status pending">Pending</span>
+    </div>
+    
+    <div class="task-actions">
+      <button class="btn btn-sm btn-primary" (click)="onEdit()">Edit</button>
+      <button class="btn btn-sm btn-danger" (click)="onDelete()">Delete</button>
+    </div>
+  </div>

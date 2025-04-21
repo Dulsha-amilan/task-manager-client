@@ -1,0 +1,27 @@
+<div class="task-list-container">
+    <div class="header">
+      <h2>Task Manager</h2>
+      <div class="user-info">
+        <span>Welcome, {{ username }}</span>
+        <button class="btn btn-outline-secondary btn-sm" (click)="logout()">Logout</button>
+      </div>
+    </div>
+    
+    <div class="alert alert-danger" *ngIf="errorMessage">{{ errorMessage }}</div>
+    
+    <div class="controls">
+      <a routerLink="/tasks/new" class="btn btn-primary">Add New Task</a>
+    </div>
+    
+    <div *ngIf="tasks.length === 0" class="no-tasks">
+      <p>You don't have any tasks yet. Click the "Add New Task" button to create one.</p>
+    </div>
+    
+    <div *ngIf="tasks.length > 0" class="tasks-grid">
+      <app-task-item 
+        *ngFor="let task of tasks" 
+        [task]="task"
+        (delete)="deleteTask($event)">
+      </app-task-item>
+    </div>
+  </div>
