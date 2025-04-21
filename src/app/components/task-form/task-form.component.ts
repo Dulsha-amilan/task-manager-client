@@ -1,5 +1,8 @@
+// task-form.component.ts
 import { Component, OnInit } from '@angular/core';
 import { Router, ActivatedRoute } from '@angular/router';
+import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import { Task } from '../../models/task.model';
 import { TaskService } from '../../services/task.service';
 import { AuthService } from '../../services/auth.service';
@@ -7,7 +10,9 @@ import { AuthService } from '../../services/auth.service';
 @Component({
   selector: 'app-task-form',
   templateUrl: './task-form.component.html',
-  styleUrls: ['./task-form.component.css']
+  styleUrls: ['./task-form.component.css'],
+  standalone: true,
+  imports: [CommonModule, FormsModule]
 })
 export class TaskFormComponent implements OnInit {
   task: Task = {
@@ -89,14 +94,5 @@ export class TaskFormComponent implements OnInit {
   
   cancel(): void {
     this.router.navigate(['/tasks']);
-  }
-  
-  // Helper for date input format
-  formatDateForInput(date: Date): string {
-    const d = new Date(date);
-    const year = d.getFullYear();
-    const month = ('0' + (d.getMonth() + 1)).slice(-2);
-    const day = ('0' + d.getDate()).slice(-2);
-    return `${year}-${month}-${day}`;
   }
 }

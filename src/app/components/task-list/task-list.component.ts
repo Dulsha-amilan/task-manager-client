@@ -1,13 +1,18 @@
+// task-list.component.ts
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
+import { CommonModule } from '@angular/common';
 import { TaskService } from '../../services/task.service';
 import { AuthService } from '../../services/auth.service';
 import { Task } from '../../models/task.model';
+import { TaskItemComponent } from '../task-item/task-item.component';
 
 @Component({
   selector: 'app-task-list',
   templateUrl: './task-list.component.html',
-  styleUrls: ['./task-list.component.css']
+  styleUrls: ['./task-list.component.css'],
+  standalone: true,
+  imports: [CommonModule, TaskItemComponent]
 })
 export class TaskListComponent implements OnInit {
   tasks: Task[] = [];
@@ -47,9 +52,7 @@ export class TaskListComponent implements OnInit {
     this.router.navigate(['/login']);
   }
   
-  deleteTask(id: number | undefined): void {
-    if (!id) return;
-    
+  deleteTask(id: number): void {
     if (confirm('Are you sure you want to delete this task?')) {
       this.taskService.deleteTask(id).subscribe({
         next: () => {
