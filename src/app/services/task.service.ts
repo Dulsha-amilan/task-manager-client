@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { HttpClient, HttpErrorResponse } from '@angular/common/http';
+import { Observable, throwError } from 'rxjs';
+import { catchError } from 'rxjs/operators';
 import { Task } from '../models/task.model';
 import { environment } from '../../environments/environment';
 import { AuthService } from './auth.service';
@@ -18,24 +19,44 @@ export class TaskService {
   
   getTasks(): Observable<Task[]> {
     const userId = this.authService.getUserId();
-    return this.http.get<Task[]>(`${this.apiUrl}/${userId}`);
+    return this.http.get<Task[]>(`${this.apiUrl}/${userId}`)
+      .pipe(catchError(this.handleError));
   }
   
   getTask(id: number): Observable<Task> {
     const userId = this.authService.getUserId();
-    return this.http.get<Task>(`${this.apiUrl}/${userId}/${id}`);
+    return this.http.get<Task>(`${this.apiUrl}/${userId}/${id}`)
+      .pipe(catchError(this.handleError));
   }
   
   createTask(task: Task): Observable<Task> {
-    return this.http.post<Task>(`${this.apiUrl}`, task);
+    return this.http.post<Task>(`${this.apiUrl}`, task)
+      .pipe(catchError(this.handleError));
   }
   
   updateTask(task: Task): Observable<Task> {
-    return this.http.put<Task>(`${this.apiUrl}/${task.id}`, task);
+    return this.http.put<Task>(`${this.apiUrl}/${task.id}`, task)
+      .pipe(catchError(this.handleError));
   }
   
   deleteTask(id: number): Observable<void> {
     const userId = this.authService.getUserId();
-    return this.http.delete<void>(`${this.apiUrl}/${userId}/${id}`);
+    return this.http.delete<void>(`${this.apiUrl}/${userId}/${id}`)
+      .pipe(catchError(this.handleError));
+  }
+  
+  private handleError(error: HttpErrorResponse) {
+    console.error('API Error:', error);
+    let errorMessage = 'An unknown error occurred';
+    
+    if (error.error instanceof ErrorEvent) {
+      // Client-side error
+      errorMessage = `Error: ${error.error.message}`;
+    } else {
+      // Server-side error
+      errorMessage = `Error Code: ${error.status}\nMessage: ${error.message}`;
+    }
+    
+    return throwError(() => new Error(errorMessage));
   }
 }

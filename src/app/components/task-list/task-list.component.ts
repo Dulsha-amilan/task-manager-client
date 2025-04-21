@@ -2,6 +2,7 @@
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
+import { RouterModule } from '@angular/router'; // Add this import
 import { TaskService } from '../../services/task.service';
 import { AuthService } from '../../services/auth.service';
 import { Task } from '../../models/task.model';
@@ -12,7 +13,7 @@ import { TaskItemComponent } from '../task-item/task-item.component';
   templateUrl: './task-list.component.html',
   styleUrls: ['./task-list.component.css'],
   standalone: true,
-  imports: [CommonModule, TaskItemComponent]
+  imports: [CommonModule, TaskItemComponent, RouterModule] // Add RouterModule here
 })
 export class TaskListComponent implements OnInit {
   tasks: Task[] = [];

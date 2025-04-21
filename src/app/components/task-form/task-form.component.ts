@@ -69,27 +69,57 @@ export class TaskFormComponent implements OnInit {
   saveTask(): void {
     this.errorMessage = '';
     
+    // Validate form
+    if (!this.task.title) {
+      this.errorMessage = 'Title is required';
+      return;
+    }
+    
+    // Ensure dueDate is in the correct format
+    if (typeof this.task.dueDate === 'string') {
+      this.task.dueDate = new Date(this.task.dueDate);
+    }
+    
+    // Create a copy of the task with properly formatted date for API
+    const taskToSave = {
+      ...this.task,
+      dueDate: this.formatDateForApi(this.task.dueDate)
+    };
+    
     if (this.isEditMode) {
-      this.taskService.updateTask(this.task).subscribe({
+      this.taskService.updateTask(taskToSave).subscribe({
         next: () => {
           this.router.navigate(['/tasks']);
         },
         error: (error) => {
-          this.errorMessage = 'Failed to update task';
+          this.errorMessage = 'Failed to update task: ' + this.getErrorMessage(error);
           console.error(error);
         }
       });
     } else {
-      this.taskService.createTask(this.task).subscribe({
+      this.taskService.createTask(taskToSave).subscribe({
         next: () => {
           this.router.navigate(['/tasks']);
         },
         error: (error) => {
-          this.errorMessage = 'Failed to create task';
+          this.errorMessage = 'Failed to create task: ' + this.getErrorMessage(error);
           console.error(error);
         }
       });
     }
+  }
+  
+  formatDateForApi(date: Date): string {
+    return date.toISOString();
+  }
+  
+  getErrorMessage(error: any): string {
+    if (error.error && error.error.message) {
+      return error.error.message;
+    } else if (error.message) {
+      return error.message;
+    }
+    return 'Unknown error occurred';
   }
   
   cancel(): void {

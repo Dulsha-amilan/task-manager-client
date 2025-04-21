@@ -1,59 +1,63 @@
 <div class="task-form-container">
-    <h2>{{ isEditMode ? 'Edit Task' : 'Create New Task' }}</h2>
+  <h2>{{ isEditMode ? 'Edit Task' : 'Create New Task' }}</h2>
+  
+  <div class="alert alert-danger" *ngIf="errorMessage">{{ errorMessage }}</div>
+  
+  <form (ngSubmit)="saveTask()" #taskForm="ngForm">
+    <div class="form-group">
+      <label for="title">Title</label>
+      <input 
+        type="text" 
+        id="title" 
+        name="title" 
+        class="form-control" 
+        [(ngModel)]="task.title" 
+        required
+        maxlength="100"
+        #title="ngModel">
+      <div *ngIf="title.invalid && (title.dirty || title.touched)" class="text-danger">
+        <div *ngIf="title.errors?.['required']">Title is required.</div>
+      </div>
+    </div>
     
-    <div class="alert alert-danger" *ngIf="errorMessage">{{ errorMessage }}</div>
+    <div class="form-group">
+      <label for="description">Description</label>
+      <textarea 
+        id="description" 
+        name="description" 
+        class="form-control" 
+        [(ngModel)]="task.description" 
+        rows="4">
+      </textarea>
+    </div>
     
-    <form (ngSubmit)="saveTask()">
-      <div class="form-group">
-        <label for="title">Title</label>
-        <input 
-          type="text" 
-          id="title" 
-          name="title" 
-          class="form-control" 
-          [(ngModel)]="task.title" 
-          required
-          maxlength="100">
-      </div>
-      
-      <div class="form-group">
-        <label for="description">Description</label>
-        <textarea 
-          id="description" 
-          name="description" 
-          class="form-control" 
-          [(ngModel)]="task.description" 
-          rows="4">
-        </textarea>
-      </div>
-      
-      <div class="form-group">
-        <label for="dueDate">Due Date</label>
-        <input 
-          type="date" 
-          id="dueDate" 
-          name="dueDate" 
-          class="form-control" 
-          [ngModel]="task.dueDate | date:'yyyy-MM-dd'" 
-          (ngModelChange)="task.dueDate = $event" 
-          required>
-      </div>
-      
-      <div class="form-check" *ngIf="isEditMode">
-        <input 
-          type="checkbox" 
-          id="isCompleted" 
-          name="isCompleted" 
-          class="form-check-input" 
-          [(ngModel)]="task.isCompleted">
-        <label class="form-check-label" for="isCompleted">
-          Mark as completed
-        </label>
-      </div>
-      
-      <div class="form-actions">
-        <button type="submit" class="btn btn-primary">Save</button>
-        <button type="button" class="btn btn-secondary" (click)="cancel()">Cancel</button>
-      </div>
-    </form>
-  </div>
+    <div class="form-group">
+      <label for="dueDate">Due Date</label>
+      <input 
+        type="date" 
+        id="dueDate" 
+        name="dueDate" 
+        class="form-control" 
+        [ngModel]="task.dueDate | date:'yyyy-MM-dd'" 
+        (ngModelChange)="task.dueDate = $event" 
+        required>
+    </div>
+    
+    <div class="form-check" *ngIf="isEditMode">
+      <input 
+        type="checkbox" 
+        id="isCompleted" 
+        name="isCompleted" 
+        class="form-check-input" 
+        [(ngModel)]="task.isCompleted">
+      <label class="form-check-label" for="isCompleted">
+        Mark as completed
+      </label>
+    </div>
+    
+    <div class="form-actions">
+      <button type="submit" class="btn btn-primary" [disabled]="taskForm.invalid">Save</button>
+      <button type="button" class="btn btn-secondary" (click)="cancel()">Cancel</button>
+    </div>
+  </form>
+</div>

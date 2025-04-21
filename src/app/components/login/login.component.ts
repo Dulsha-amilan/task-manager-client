@@ -1,4 +1,3 @@
-// login.component.ts
 import { Component } from '@angular/core';
 import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
@@ -20,15 +19,15 @@ export class LoginComponent {
     password: ''
   };
   errorMessage = '';
-  
+
   constructor(
     private authService: AuthService,
     private router: Router
   ) { }
-  
+
   login(): void {
     this.errorMessage = '';
-    
+
     this.authService.login(this.loginModel).subscribe({
       next: (response) => {
         if (response.success) {

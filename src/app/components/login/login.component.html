@@ -1,8 +1,14 @@
-<div class="login-container">
-    <h2>Login</h2>
-    
+<div class="login-page">
+  <div class="image-container">
+    <img class="img-responsive" src="assets/images/UntitledDesign.png">
+  </div>
+  
+  <div class="login-container">
+    <h2>Welcome Back</h2>
+    <p class="subtitle">Enter your credentials to access your account</p>
+
     <div class="alert alert-danger" *ngIf="errorMessage">{{ errorMessage }}</div>
-    
+
     <form (ngSubmit)="login()">
       <div class="form-group">
         <label for="username">Username</label>
@@ -12,9 +18,10 @@
           name="username" 
           class="form-control" 
           [(ngModel)]="loginModel.username" 
+          placeholder="Enter your username"
           required>
       </div>
-      
+
       <div class="form-group">
         <label for="password">Password</label>
         <input 
@@ -23,15 +30,25 @@
           name="password" 
           class="form-control" 
           [(ngModel)]="loginModel.password" 
+          placeholder="Enter your password"
           required>
       </div>
-      
+
+      <div class="form-options">
+        <div class="remember-me">
+          <input type="checkbox" id="remember" name="remember">
+          <label for="remember">Remember me</label>
+        </div>
+        <a href="#" class="forgot-password">Forgot password?</a>
+      </div>
+
       <div class="form-group">
         <button type="submit" class="btn btn-primary">Login</button>
       </div>
     </form>
-    
+
     <div class="register-link">
       Don't have an account? <a routerLink="/register">Register</a>
     </div>
   </div>
+</div>
