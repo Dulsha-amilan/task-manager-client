@@ -1,7 +1,38 @@
+/* task-list.component.css */
 .task-list-container {
   max-width: 800px;
   margin: 20px auto;
   padding: 20px;
+}
+
+.task-controls {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.search-container {
+  display: flex;
+  align-items: center;
+  flex: 1;
+  max-width: 400px;
+  position: relative;
+}
+
+.search-input {
+  width: 100%;
+  padding-right: 40px;
+}
+
+.clear-btn {
+  position: absolute;
+  right: 5px;
+  top: 50%;
+  transform: translateY(-50%);
+  border: none;
+  background: transparent;
+  font-size: 0.8rem;
 }
 
 .add-task-button {
@@ -21,8 +52,11 @@
 }
 
 .loading-spinner {
-  text-align: center;
+  display: flex;
+  justify-content: center;
   margin: 20px 0;
+  text-align: center;
+  padding: 20px;
 }
 
 .alert-danger {
@@ -33,14 +67,129 @@
   margin-bottom: 20px;
 }
 
-.no-tasks {
+.no-tasks, .no-search-results {
   text-align: center;
-  color: #666;
+  color: #6c757d;
   margin: 30px 0;
+}
+
+.no-tasks {
+  padding: 30px;
+  background-color: #f8f9fa;
+  border-radius: 5px;
 }
 
 .task-list {
   display: flex;
   flex-direction: column;
   gap: 15px;
+  margin-top: 15px;
+}
+
+.filters-container {
+  padding: 15px;
+  background-color: #f8f9fa;
+  border-radius: 5px;
+  margin-bottom: 20px;
+}
+
+.sort-link {
+  text-decoration: none;
+  color: #212529;
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+}
+
+.sort-link:hover {
+  color: #0d6efd;
+}
+
+.sort-asc::after {
+  content: " ▲";
+  font-size: 0.8em;
+}
+
+.sort-desc::after {
+  content: " ▼";
+  font-size: 0.8em;
+}
+
+.task-list-header {
+  font-weight: bold;
+  padding: 10px 0;
+  border-bottom: 2px solid #dee2e6;
+}
+/* Enhanced Search Bar Styling */
+.search-container {
+  display: flex;
+  align-items: center;
+  flex: 1;
+  max-width: 400px;
+  position: relative;
+  margin-right: 20px;
+}
+
+.search-input {
+  width: 100%;
+  padding: 10px 40px 10px 40px;
+  border-radius: 25px;
+  border: 1px solid #ddd;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+  font-size: 14px;
+}
+
+.search-input:focus {
+  border-color: #007bff;
+  box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.25);
+  outline: none;
+}
+
+.search-icon {
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #6c757d;
+  font-size: 16px;
+}
+
+.clear-btn {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  border: none;
+  background: transparent;
+  color: #6c757d;
+  cursor: pointer;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  transition: all 0.2s ease;
+}
+
+.clear-btn:hover {
+  background-color: #e9ecef;
+  color: #495057;
+}
+
+/* Make sure the search container looks good in the task controls */
+.task-controls {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 25px;
+}
+
+/* Search results highlight */
+.highlight {
+  background-color: rgba(255, 230, 0, 0.3);
+  padding: 2px;
+  border-radius: 2px;
 }

@@ -1,9 +1,9 @@
-// register.component.ts
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { Router, RouterModule } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
+import { NotificationService } from '../../services/notification.service';
 
 @Component({
   selector: 'app-register',
@@ -21,7 +21,8 @@ export class RegisterComponent implements OnInit {
   constructor(
     private formBuilder: FormBuilder,
     private router: Router,
-    private authService: AuthService
+    private authService: AuthService,
+    private notificationService: NotificationService
   ) {
     // redirect to home if already logged in
     if (this.authService.isLoggedIn()) {
@@ -55,10 +56,14 @@ export class RegisterComponent implements OnInit {
     })
       .subscribe({
         next: () => {
+          // Use notification service instead of alert
+          this.notificationService.success('Registration successful! Please login with your new account.');
+          // Then navigate to login page
           this.router.navigate(['/login'], { queryParams: { registered: true }});
         },
         error: error => {
           this.error = error.error?.message || 'Registration failed';
+          this.notificationService.error(this.error);
           this.loading = false;
         }
       });

@@ -5,6 +5,7 @@ import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angula
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { Task } from '../../models/task.model';
 import { TaskService } from '../../services/task.service';
+import { NotificationService } from '../../services/notification.service';
 
 @Component({
   selector: 'app-task-form',
@@ -25,7 +26,8 @@ export class TaskFormComponent implements OnInit {
     private formBuilder: FormBuilder,
     private router: Router,
     private route: ActivatedRoute,
-    private taskService: TaskService
+    private taskService: TaskService,
+    private notificationService: NotificationService
   ) {
     this.taskForm = this.formBuilder.group({
       title: ['', Validators.required],
@@ -46,13 +48,14 @@ export class TaskFormComponent implements OnInit {
             this.taskForm.patchValue({
               title: task.title,
               description: task.description,
-              dueDate: task.dueDate ? new Date(task.dueDate) : null
+              dueDate: task.dueDate ? new Date(task.dueDate).toISOString().split('T')[0] : null
             });
             this.loading = false;
           },
           error: error => {
             this.error = 'Error loading task';
             this.loading = false;
+            this.notificationService.error('Failed to load task details.');
           }
         });
     }
@@ -77,29 +80,33 @@ export class TaskFormComponent implements OnInit {
       description: this.f['description'].value,
       isCompleted: false,
       createdAt: new Date(),
-      dueDate: this.f['dueDate'].value
+      dueDate: this.f['dueDate'].value ? new Date(this.f['dueDate'].value) : null
     };
     
     if (this.isEditMode) {
       this.taskService.updateTask(task)
         .subscribe({
           next: () => {
+            this.notificationService.success('Task successfully updated!');
             this.router.navigate(['/tasks']);
           },
           error: error => {
             this.error = 'Error updating task';
             this.loading = false;
+            this.notificationService.error('Failed to update task. Please try again.');
           }
         });
     } else {
       this.taskService.createTask(task)
         .subscribe({
           next: () => {
+            this.notificationService.success('New task created successfully!');
             this.router.navigate(['/tasks']);
           },
           error: error => {
             this.error = 'Error creating task';
             this.loading = false;
+            this.notificationService.error('Failed to create task. Please try again.');
           }
         });
     }
