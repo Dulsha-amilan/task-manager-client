@@ -1,128 +1,107 @@
 // task-form.component.ts
 import { Component, OnInit } from '@angular/core';
-import { Router, ActivatedRoute } from '@angular/router';
 import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
+import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
+import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { Task } from '../../models/task.model';
 import { TaskService } from '../../services/task.service';
-import { AuthService } from '../../services/auth.service';
 
 @Component({
   selector: 'app-task-form',
   templateUrl: './task-form.component.html',
   styleUrls: ['./task-form.component.css'],
   standalone: true,
-  imports: [CommonModule, FormsModule]
+  imports: [CommonModule, ReactiveFormsModule, RouterModule]
 })
 export class TaskFormComponent implements OnInit {
-  task: Task = {
-    title: '',
-    description: '',
-    isCompleted: false,
-    dueDate: new Date(),
-    userId: 0
-  };
-  
+  taskForm: FormGroup;
+  loading = false;
+  submitted = false;
+  error = '';
   isEditMode = false;
-  errorMessage = '';
+  taskId?: number;
   
   constructor(
-    private taskService: TaskService,
-    private authService: AuthService,
+    private formBuilder: FormBuilder,
     private router: Router,
-    private route: ActivatedRoute
-  ) { }
-  
-  ngOnInit(): void {
-    if (!this.authService.isLoggedIn()) {
-      this.router.navigate(['/login']);
-      return;
-    }
-    
-    // Set the user ID
-    this.task.userId = this.authService.getUserId();
-    
-    // Check if we're in edit mode
-    const id = this.route.snapshot.paramMap.get('id');
-    if (id) {
-      this.isEditMode = true;
-      this.loadTask(+id);
-    }
-  }
-  
-  loadTask(id: number): void {
-    this.taskService.getTask(id).subscribe({
-      next: (task) => {
-        this.task = task;
-        // Convert string date to Date object if needed
-        if (typeof this.task.dueDate === 'string') {
-          this.task.dueDate = new Date(this.task.dueDate);
-        }
-      },
-      error: (error) => {
-        this.errorMessage = 'Failed to load task';
-        console.error(error);
-      }
+    private route: ActivatedRoute,
+    private taskService: TaskService
+  ) {
+    this.taskForm = this.formBuilder.group({
+      title: ['', Validators.required],
+      description: [''],
+      dueDate: [null]
     });
   }
   
-  saveTask(): void {
-    this.errorMessage = '';
+  ngOnInit(): void {
+    this.taskId = this.route.snapshot.params['id'];
+    this.isEditMode = !!this.taskId;
     
-    // Validate form
-    if (!this.task.title) {
-      this.errorMessage = 'Title is required';
+    if (this.isEditMode) {
+      this.loading = true;
+      this.taskService.getTask(this.taskId!)
+        .subscribe({
+          next: task => {
+            this.taskForm.patchValue({
+              title: task.title,
+              description: task.description,
+              dueDate: task.dueDate ? new Date(task.dueDate) : null
+            });
+            this.loading = false;
+          },
+          error: error => {
+            this.error = 'Error loading task';
+            this.loading = false;
+          }
+        });
+    }
+  }
+  
+  // convenience getter for easy access to form fields
+  get f() { return this.taskForm.controls; }
+  
+  onSubmit() {
+    this.submitted = true;
+    
+    // stop here if form is invalid
+    if (this.taskForm.invalid) {
       return;
     }
     
-    // Ensure dueDate is in the correct format
-    if (typeof this.task.dueDate === 'string') {
-      this.task.dueDate = new Date(this.task.dueDate);
-    }
+    this.loading = true;
     
-    // Create a copy of the task with properly formatted date for API
-    const taskToSave = {
-      ...this.task,
-      dueDate: this.formatDateForApi(this.task.dueDate)
+    const task: Task = {
+      id: this.isEditMode ? this.taskId : undefined,
+      title: this.f['title'].value,
+      description: this.f['description'].value,
+      isCompleted: false,
+      createdAt: new Date(),
+      dueDate: this.f['dueDate'].value
     };
     
     if (this.isEditMode) {
-      this.taskService.updateTask(taskToSave).subscribe({
-        next: () => {
-          this.router.navigate(['/tasks']);
-        },
-        error: (error) => {
-          this.errorMessage = 'Failed to update task: ' + this.getErrorMessage(error);
-          console.error(error);
-        }
-      });
+      this.taskService.updateTask(task)
+        .subscribe({
+          next: () => {
+            this.router.navigate(['/tasks']);
+          },
+          error: error => {
+            this.error = 'Error updating task';
+            this.loading = false;
+          }
+        });
     } else {
-      this.taskService.createTask(taskToSave).subscribe({
-        next: () => {
-          this.router.navigate(['/tasks']);
-        },
-        error: (error) => {
-          this.errorMessage = 'Failed to create task: ' + this.getErrorMessage(error);
-          console.error(error);
-        }
-      });
+      this.taskService.createTask(task)
+        .subscribe({
+          next: () => {
+            this.router.navigate(['/tasks']);
+          },
+          error: error => {
+            this.error = 'Error creating task';
+            this.loading = false;
+          }
+        });
     }
-  }
-  
-  formatDateForApi(date: Date): string {
-    return date.toISOString();
-  }
-  
-  getErrorMessage(error: any): string {
-    if (error.error && error.error.message) {
-      return error.error.message;
-    } else if (error.message) {
-      return error.message;
-    }
-    return 'Unknown error occurred';
-  }
-  
-  cancel(): void {
-    this.router.navigate(['/tasks']);
   }
 }

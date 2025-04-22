@@ -1,47 +1,77 @@
 // task-item.component.ts
-import { Component, Input, Output, EventEmitter } from '@angular/core';
-import { Router } from '@angular/router';
-import { CommonModule } from '@angular/common';
+import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
+import { CommonModule, DatePipe } from '@angular/common';
+import { Router, RouterModule } from '@angular/router';
 import { Task } from '../../models/task.model';
+import { TaskService } from '../../services/task.service';
 
 @Component({
   selector: 'app-task-item',
   templateUrl: './task-item.component.html',
   styleUrls: ['./task-item.component.css'],
   standalone: true,
-  imports: [CommonModule]
+  imports: [CommonModule, DatePipe, RouterModule]
 })
-export class TaskItemComponent {
+export class TaskItemComponent implements OnInit {
   @Input() task!: Task;
-  @Output() delete = new EventEmitter<number>();
-  today = new Date(); // Added this for the date comparison in template
+  @Output() taskDeleted = new EventEmitter<number>();
+  @Output() taskStatusChanged = new EventEmitter<Task>();
   
-  constructor(private router: Router) { }
+  loading = false;
   
-  onEdit(): void {
-    if (this.task.id) {
-      this.router.navigate(['/tasks/edit', this.task.id]);
+  constructor(
+    private router: Router,
+    private taskService: TaskService
+  ) { }
+  
+  ngOnInit(): void {
+  }
+  
+  onEditClick() {
+    this.router.navigate(['/tasks', this.task.id, 'edit']);
+  }
+  
+  onDeleteClick() {
+    if (confirm('Are you sure you want to delete this task?')) {
+      this.loading = true;
+      this.taskService.deleteTask(this.task.id!)
+        .subscribe({
+          next: () => {
+            this.taskDeleted.emit(this.task.id);
+            this.loading = false;
+          },
+          error: error => {
+            console.error('Error deleting task', error);
+            this.loading = false;
+          }
+        });
     }
   }
   
-  onDelete(): void {
-    if (this.task.id) {
-      this.delete.emit(this.task.id);
-    }
+  onStatusChange(event: Event) {
+    const isCompleted = (event.target as HTMLInputElement).checked;
+    const updatedTask: Task = {
+      ...this.task,
+      isCompleted
+    };
+    
+    this.loading = true;
+    this.taskService.updateTask(updatedTask)
+      .subscribe({
+        next: () => {
+          this.task.isCompleted = isCompleted;
+          this.taskStatusChanged.emit(this.task);
+          this.loading = false;
+        },
+        error: error => {
+          console.error('Error updating task status', error);
+          this.loading = false;
+        }
+      });
   }
   
-  getStatusClass(): string {
-    if (this.task.isCompleted) {
-      return 'status-completed';
-    }
-    
-    const dueDate = new Date(this.task.dueDate);
-    const today = new Date();
-    
-    if (dueDate < today && !this.task.isCompleted) {
-      return 'status-overdue';
-    }
-    
-    return 'status-pending';
+  formatDate(date: Date | undefined): string {
+    if (!date) return 'No due date';
+    return new Date(date).toLocaleDateString();
   }
 }

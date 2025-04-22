@@ -1,54 +1,32 @@
-<div class="login-page">
-  <div class="image-container">
-    <img class="img-responsive" src="assets/images/UntitledDesign.png">
-  </div>
-  
-  <div class="login-container">
-    <h2>Welcome Back</h2>
-    <p class="subtitle">Enter your credentials to access your account</p>
-
-    <div class="alert alert-danger" *ngIf="errorMessage">{{ errorMessage }}</div>
-
-    <form (ngSubmit)="login()">
-      <div class="form-group">
-        <label for="username">Username</label>
-        <input 
-          type="text" 
-          id="username" 
-          name="username" 
-          class="form-control" 
-          [(ngModel)]="loginModel.username" 
-          placeholder="Enter your username"
-          required>
+<div class="login-container">
+  <h2>Login</h2>
+  <form [formGroup]="loginForm" (ngSubmit)="onSubmit()">
+    <div class="form-group">
+      <label for="username">Username</label>
+      <input type="text" id="username" formControlName="username" class="form-control" 
+        [ngClass]="{ 'is-invalid': submitted && f['username'].errors }" />
+      <div *ngIf="submitted && f['username'].errors" class="invalid-feedback">
+        <div *ngIf="f['username'].errors['required']">Username is required</div>
       </div>
-
-      <div class="form-group">
-        <label for="password">Password</label>
-        <input 
-          type="password" 
-          id="password" 
-          name="password" 
-          class="form-control" 
-          [(ngModel)]="loginModel.password" 
-          placeholder="Enter your password"
-          required>
-      </div>
-
-      <div class="form-options">
-        <div class="remember-me">
-          <input type="checkbox" id="remember" name="remember">
-          <label for="remember">Remember me</label>
-        </div>
-        <a href="#" class="forgot-password">Forgot password?</a>
-      </div>
-
-      <div class="form-group">
-        <button type="submit" class="btn btn-primary">Login</button>
-      </div>
-    </form>
-
-    <div class="register-link">
-      Don't have an account? <a routerLink="/register">Register</a>
     </div>
-  </div>
+    
+    <div class="form-group">
+      <label for="password">Password</label>
+      <input type="password" id="password" formControlName="password" class="form-control" 
+        [ngClass]="{ 'is-invalid': submitted && f['password'].errors }" />
+      <div *ngIf="submitted && f['password'].errors" class="invalid-feedback">
+        <div *ngIf="f['password'].errors['required']">Password is required</div>
+      </div>
+    </div>
+    
+    <div class="form-group">
+      <button [disabled]="loading" class="btn btn-primary">
+        <span *ngIf="loading" class="spinner-border spinner-border-sm mr-1"></span>
+        Login
+      </button>
+      <a routerLink="/register" class="btn btn-link">Register</a>
+    </div>
+    
+    <div *ngIf="error" class="alert alert-danger mt-3">{{error}}</div>
+  </form>
 </div>

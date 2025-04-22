@@ -1,3 +1,20 @@
 <div class="app-container">
-  <router-outlet></router-outlet>
+  <header class="app-header">
+    <div class="app-title">
+      <h1>Task Manager</h1>
+    </div>
+    <nav class="app-nav" *ngIf="currentUser">
+      <a routerLink="/tasks" routerLinkActive="active">Task List</a>
+      <a routerLink="/tasks/new" routerLinkActive="active">Add Task</a>
+      <button routerLink="/login" class="btn-logout" (click)="logout()">Logout</button>
+    </nav>
+  </header>
+  
+  <main class="app-content">
+    <router-outlet></router-outlet>
+  </main>
+  
+  <footer class="app-footer">
+    <p>&copy; 2025 Task Manager Application</p>
+  </footer>
 </div>

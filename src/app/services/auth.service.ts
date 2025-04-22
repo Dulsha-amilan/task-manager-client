@@ -1,49 +1,48 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable } from 'rxjs';
-import { tap } from 'rxjs/operators';
-import { LoginModel, RegisterModel, AuthResponse } from '../models/user.model';
+import { BehaviorSubject, Observable, tap } from 'rxjs';
+import { User, LoginRequest, RegisterRequest } from '../models/user.model';
 import { environment } from '../../environments/environment';
 
 @Injectable({
   providedIn: 'root'
 })
 export class AuthService {
-  private apiUrl = `${environment.apiUrl}/api/auth`;
+  private currentUserSubject: BehaviorSubject<User | null>;
+  public currentUser: Observable<User | null>;
   
-  constructor(private http: HttpClient) { }
-  
-  login(loginModel: LoginModel): Observable<AuthResponse> {
-    return this.http.post<AuthResponse>(`${this.apiUrl}/login`, loginModel)
-      .pipe(
-        tap(response => {
-          if (response.success) {
-            localStorage.setItem('userId', response.userId.toString());
-            localStorage.setItem('username', response.username);
-          }
-        })
-      );
+  constructor(private http: HttpClient) {
+    this.currentUserSubject = new BehaviorSubject<User | null>(
+      JSON.parse(localStorage.getItem('currentUser') || 'null')
+    );
+    this.currentUser = this.currentUserSubject.asObservable();
   }
   
-  register(registerModel: RegisterModel): Observable<AuthResponse> {
-    return this.http.post<AuthResponse>(`${this.apiUrl}/register`, registerModel);
+  public get currentUserValue(): User | null {
+    return this.currentUserSubject.value;
   }
   
-  logout(): void {
-    localStorage.removeItem('userId');
-    localStorage.removeItem('username');
+  login(loginRequest: LoginRequest): Observable<User> {
+    return this.http.post<User>(`${environment.apiUrl}/api/Auth/login`, loginRequest)
+      .pipe(tap(user => {
+        // store user details in local storage
+        localStorage.setItem('currentUser', JSON.stringify(user));
+        this.currentUserSubject.next(user);
+        return user;
+      }));
+  }
+  
+  register(registerRequest: RegisterRequest): Observable<User> {
+    return this.http.post<User>(`${environment.apiUrl}/api/Auth/register`, registerRequest);
+  }
+  
+  logout() {
+    // remove user from local storage
+    localStorage.removeItem('currentUser');
+    this.currentUserSubject.next(null);
   }
   
   isLoggedIn(): boolean {
-    return !!localStorage.getItem('userId');
-  }
-  
-  getUserId(): number {
-    const userId = localStorage.getItem('userId');
-    return userId ? parseInt(userId, 10) : 0;
-  }
-  
-  getUsername(): string {
-    return localStorage.getItem('username') || '';
+    return !!this.currentUserValue;
   }
 }

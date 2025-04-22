@@ -1,45 +1,66 @@
 // register.component.ts
-import { Component } from '@angular/core';
-import { Router } from '@angular/router';
+import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
-import { RouterModule } from '@angular/router';
+import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
+import { Router, RouterModule } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
-import { RegisterModel } from '../../models/user.model';
 
 @Component({
   selector: 'app-register',
   templateUrl: './register.component.html',
   styleUrls: ['./register.component.css'],
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterModule]
+  imports: [CommonModule, ReactiveFormsModule, RouterModule]
 })
-export class RegisterComponent {
-  registerModel: RegisterModel = {
-    username: '',
-    password: ''
-  };
-  errorMessage = '';
+export class RegisterComponent implements OnInit {
+  registerForm: FormGroup;
+  loading = false;
+  submitted = false;
+  error = '';
   
   constructor(
-    private authService: AuthService,
-    private router: Router
-  ) { }
-  
-  register(): void {
-    this.errorMessage = '';
+    private formBuilder: FormBuilder,
+    private router: Router,
+    private authService: AuthService
+  ) {
+    // redirect to home if already logged in
+    if (this.authService.isLoggedIn()) {
+      this.router.navigate(['/']);
+    }
     
-    this.authService.register(this.registerModel).subscribe({
-      next: (response) => {
-        if (response.success) {
-          this.router.navigate(['/login']);
-        } else {
-          this.errorMessage = response.message;
-        }
-      },
-      error: (error) => {
-        this.errorMessage = error?.error?.message || 'Registration failed';
-      }
+    this.registerForm = this.formBuilder.group({
+      username: ['', [Validators.required, Validators.minLength(3)]],
+      password: ['', [Validators.required, Validators.minLength(6)]]
     });
+  }
+  
+  ngOnInit(): void {
+  }
+  
+  // convenience getter for easy access to form fields
+  get f() { return this.registerForm.controls; }
+  
+  onSubmit() {
+    this.submitted = true;
+    
+    // stop here if form is invalid
+    if (this.registerForm.invalid) {
+      return;
+    }
+    
+    this.loading = true;
+    this.authService.register({
+      username: this.f['username'].value,
+      password: this.f['password'].value
+    })
+      .subscribe({
+        next: () => {
+          this.router.navigate(['/login'], { queryParams: { registered: true }});
+        },
+        error: error => {
+          this.error = error.error?.message || 'Registration failed';
+          this.loading = false;
+        }
+      });
   }
 }
